@@ -1,0 +1,54 @@
+Threat: Hard coded password
+Location:
+-SampleNetworkServer.py line 61
+SampleNetworkClient.py line 56
+
+Description: Anyone with access to the source code can see and use it to authenticate to the server. This is also visible via wireshark.
+
+Case:
+nc -u 127.0.0.1 23456
+AUTH !Q#E%T&U8i6y4r2w
+P4yNOom1WRepZapO
+P4yNOom1WRepZapO;SET_DEGF
+
+Remediation: 
+-Use proper user authentication or an external file/database to authenticate the user before allowing commands. If you are authenticating against a
+variable vs a hardcoded element, you are less at risk of unauthorized access.
+-Communications should be encrypted using TLS.
+
+Threat: Cleartext password over the network
+Description: This is visible via wireshark.
+Remediation:
+-Communications should be encrypted using TLS.
+
+Threat: Sniff wireshark, revoke valid tokens
+Description: By sniffing network packets between components you can see plaintext cookies over the wire. This cookie can be used next to the LOGOUT command to revoke a valid token that does not belong to you.
+
+Case:
+nc -u 127.0.0.1 23456
+AUTH !Q#E%T&U8i6y4r2w
+P4yNOom1WRepZapO
+P4yNOom1WRepZapO;SET_DEGF
+LOGOUT P4yNOom1WRepZapO
+P4yNOom1WRepZapO;SET_DEGK
+Bad Token
+
+Remediation:
+-Communications should be encrypted using TLS.
+
+Threat: Threads used in objects could cause race condition/deadlock. Not thread safe.
+Decription: The server can take requests from multiple process running on attacker machine at the same time, eventually this could cause a race condition if a token is
+revoked and is still valid or vice versa.
+
+Remediation: Use thread locks.
+SampleNetworkServer.py should have a locky = threading.acquire() in its run function.
+
+Threat: TCP vs UDP
+Decription: The server and clients are using UDP communications which by nature are unencrypted and do not provide reliable communication.
+Reliable communication in this scenario of an infant incubator is very important because this is life or death.
+
+Remediations:
+-Implement the server/client architecture in TCP
+-Communications should be encrypted using TLS.
+
+
